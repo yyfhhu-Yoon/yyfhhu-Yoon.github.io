@@ -26,11 +26,11 @@ author:
   avatar           : "touxiang.png"
   name             : "Yin Yifan"
   pronouns         : # example: "she/her"  
-  bio              : "Short biography for the left-hand sidebar"
-  location         : "Earth"
-  employer         : "Red Brick University"
-  uri              : # URL
-  email            : "none@example.org" 
+  bio              : "A master student in Limnology/Earth Science"
+  location         : "Nanjing, China"
+  employer         : "Hohai University"
+  uri              : yyfhhu-yoon.github.io
+  email            : "yin_yifan@outlook.com" 
 
   # Academic websites
   academia         : # URL
