@@ -9,10 +9,10 @@
 
 main:
   - title: "About me"
-    url: /About me/
+    url: /aboutme/
      
   - title: "Mochou Mesocosm"
-    url: /Mochou Mesocosm/
+    url: /Mochou/
 
   - title: "R"
     url: /R/
