@@ -23,7 +23,7 @@ repository               : "yyfhhu-yoon.github.io"
 #               Additional customization can be done by editing /_includes/author-profile.html
 author:
   # Biographic information
-  avatar           : "touxiang.png"
+  avatar           : "./touxiang.png"
   name             : "Yin Yifan"
   pronouns         : # example: "she/her"  
   bio              : "A master student in Limnology/Earth Science"
