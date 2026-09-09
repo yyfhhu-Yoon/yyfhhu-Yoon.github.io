@@ -1,9 +1,13 @@
 ---
-permalink: /mochou/         
+layout: archive
 title: "Mochou Mesocosm"
-layout: single
+permalink: /mochou/
 author_profile: true
+redirect_from:
+  - /resume
 ---
+
+{% include base_path %}
 
 ## 围隔背景介绍
 
