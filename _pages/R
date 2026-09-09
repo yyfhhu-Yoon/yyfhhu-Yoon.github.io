@@ -1,9 +1,13 @@
 ---
-permalink: /r/          # 访问地址：https://yyfhhu-yoon.github.io/r/
-title: "R 语言代码库"    # 页面标题
-layout: single          # 使用标准布局
-author_profile: true    # 显示侧边栏
+layout: archive
+title: "R"
+permalink: /R/
+author_profile: true
+redirect_from:
+  - /resume
 ---
+
+{% include base_path %}
 
 ## R 语言代码存放处 （deepseek整理，待补充和检查）
 ```r
