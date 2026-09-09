@@ -1,9 +1,9 @@
 ---
 permalink: /
-title: "Academic Pages is a ready-to-fork GitHub Pages template for academic personal websites"
+title: "yyf练习用个人主页+资料整理"
 author_profile: true
 redirect_from: 
   - /about/
   - /about.html
 ---
-This is a test web for yyf.
+学习使用中...
