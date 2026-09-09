@@ -1,10 +1,346 @@
 ---
-permalink: yyfhhu-Yoon.github.io/R/   # 这是你网页的最终访问地址，比如 你的用户名yyfhhu-Yoon.github.io/research/
-title: "R"        # 这是你希望在浏览器标签页和页面标题中显示的名称
-layout: single          # 使用这个布局可以保持和你现有页面（如Publications）一致的风格
-author_profile: true    # 设置为 true 可以显示侧边栏的个人信息
+permalink: /r/          # 访问地址：https://yyfhhu-yoon.github.io/r/
+title: "R 语言代码库"    # 页面标题
+layout: single          # 使用标准布局
+author_profile: true    # 显示侧边栏
 ---
-<!-- 这里是你的页面内容 -->
-<!-- 从下一行开始，你就可以用 Markdown 格式写你想展示的内容了 -->
 
-R语言代码存放处
+## R 语言代码存放处 （deepseek整理，待补充和检查）
+```r
+# ============================================================================
+
+# ============================================================================
+# 0. 环境准备
+# ============================================================================
+# 清空工作区
+remove(list=ls())
+
+# 设置工作目录（建议修改为您的项目路径）
+# setwd("D:/您的项目路径/")
+
+# ============================================================================
+# 1. 加载所有需要的包
+# ============================================================================
+library(readr)          # 数据读取
+library(ggplot2)        # 绘图
+library(RColorBrewer)   # 配色
+library(ggsci)          # 科学配色
+library(ggpubr)         # 绘图辅助
+library(plyr)           # 数据汇总
+library(lubridate)      # 日期处理
+library(vegan)          # 生态学分析（RDA, Mantel）
+library(dplyr)          # 数据处理
+library(ggcor)          # Mantel检验绘图
+library(corrplot)       # 相关性图
+library(Hmisc)          # 相关性检验
+library(factoextra)     # PCA可视化
+library(FactoMineR)     # PCA分析
+library(car)            # 多重共线性检验（VIF）
+library(flextable)      # 表格输出
+library(plspm)          # 结构方程模型
+library(gghalves)       # 半箱线图
+library(MASS)           # 逐步回归
+library(gcookbook)      # 示例数据
+library(ragg)           # 高质量图片输出
+
+# ============================================================================
+# 2. 数据读取与汇总模块
+# ============================================================================
+
+# 2.1 读取CSV数据
+data <- read.csv("数据文件路径.csv", sep = ",")
+
+# 2.2 按多个分组变量计算均值、标准差、标准误
+summary_stats <- ddply(data, c("分组变量1", "分组变量2"), summarise,
+                       N    = length(目标变量),
+                       mean = mean(目标变量, na.rm = TRUE),
+                       sd   = sd(目标变量, na.rm = TRUE),
+                       se   = sd / sqrt(N)
+)
+
+# 将分组变量转为字符型（避免因子干扰）
+summary_stats$分组变量1 <- as.character(summary_stats$分组变量1)
+
+# 查看数据结构
+str(summary_stats)
+
+# 保存汇总结果
+write.csv(summary_stats, "输出路径/summary_stats.csv")
+
+# ============================================================================
+# 3. 绘图模块
+# ============================================================================
+
+# 3.1 堆积柱状图（展示各组分贡献）
+# 适用场景：展示不同组分在时间/空间上的占比变化
+p_stacked_bar <- ggplot(summary_stats, aes(x=Time, y=mean, group=Type)) +
+  geom_bar(stat="identity", position="stack", aes(fill=Type)) +
+  geom_text(aes(label=Type), position=position_stack(vjust=0.5)) +
+  theme_bw() +
+  ylab("Biomass") +
+  theme(axis.text=element_text(size=12), 
+        axis.title=element_text(size=14))
+
+# 保存
+ggsave("输出路径/stacked_bar.eps", plot=p_stacked_bar, width=10, height=8, dpi=500)
+ggsave("输出路径/stacked_bar.png", plot=p_stacked_bar, width=10, height=8, dpi=500)
+
+# 3.2 分组柱状图（带误差棒）
+# 适用场景：比较不同组间的均值差异
+p_bar_error <- ggplot(df, aes(x=Month, y=Biomass, fill=Zone)) +
+  geom_bar(stat="identity", color="black", position=position_dodge(), width=0.7, size=0.25) +
+  geom_errorbar(aes(ymin=Biomass-SD, ymax=Biomass+SD), 
+                colour="black", position=position_dodge(0.7), width=0.3) +
+  scale_fill_brewer(palette=5) +
+  theme_classic2() +
+  ylab(bquote('Biomass ('*g/m^2*')')) +
+  theme(axis.text=element_text(size=20), 
+        axis.title=element_text(size=22))
+
+ggsave("输出路径/bar_error.png", plot=p_bar_error, width=12, height=8, dpi=600)
+
+# 3.3 箱线图（带显著性标记）
+# 适用场景：展示数据分布并标记统计显著性
+p_boxplot <- ggplot(mydata, aes(x=Zone, y=dCO2, color=Zone)) +
+  stat_boxplot(geom="errorbar", position=position_dodge(width=0.2), width=0.3, size=1) +
+  geom_boxplot(notch=FALSE, size=0.7) +
+  scale_color_npg() +
+  scale_fill_npg() +
+  theme_classic() +
+  ylab(bquote('dCO2 ('*mu~mol~L^-1*')')) +
+  geom_signif(comparisons = list(c("RL","UR"), c("RL","IR"), c("UR","IR")),
+              map_signif_level=TRUE, test=t.test,
+              y_position=c(180,190,200), tip_length=0, size=1, textsize=5) +
+  theme(axis.text=element_text(size=20), 
+        axis.title=element_text(size=22))
+
+ggsave("输出路径/boxplot.eps", plot=p_boxplot, width=6, height=4, dpi=600)
+
+# 3.4 折线图（带误差棒）
+# 适用场景：展示时间序列变化趋势
+p_line <- ggplot(df, aes(x=Month, y=fCH4, group=Zone, color=Zone, shape=Zone)) +
+  geom_point(size=2) +
+  geom_line(size=1) +
+  geom_errorbar(aes(ymin=fCH4-SDCH4, ymax=fCH4+SDCH4), width=0.1) +
+  theme_bw() +
+  labs(x='Month', y='fCH4 (nmol m-2 s-1)') +
+  theme(axis.text=element_text(size=12),
+        axis.title=element_text(size=14))
+
+ggsave("输出路径/lineplot.eps", plot=p_line, width=10, height=6, dpi=600)
+
+# 3.5 半箱线图（箱线图+抖动点）
+# 适用场景：展示数据分布同时显示所有数据点
+p_half_box <- ggplot(df, aes(Zone, ac, fill=Zone)) +
+  geom_boxplot(width=0.4, size=1.0, outlier.color=NA) +
+  geom_jitter(aes(fill=Zone), size=1, width=0.2) +
+  scale_fill_manual(values=c("#2878B5", "#9AC9DB", "#F8AC8C")) +
+  geom_signif(comparisons=list(c("RL","UR"), c("RL","IR"), c("UR","IR")),
+              map_signif_level=TRUE, test=t.test,
+              y_position=c(1.06,1.065,1.07), tip_length=0, size=1) +
+  geom_hline(aes(yintercept=1.055), color="red", size=1, linetype="dashed") +
+  theme_bw() +
+  theme(panel.grid=element_blank(),
+        axis.text=element_text(color='black', size=12),
+        axis.title=element_text(color='black', size=15))
+
+ggsave("输出路径/half_boxplot.eps", plot=p_half_box, width=10, height=6, dpi=600)
+
+# ============================================================================
+# 4. 统计分析模块
+# ============================================================================
+
+# 4.1 Pearson相关性分析 + 显著性检验
+# ====================================
+library(Hmisc)
+library(corrplot)
+
+# 选择数值列
+mydata_cor <- data[, c(列索引范围)]
+
+# 计算相关性矩阵
+cor_result <- rcorr(as.matrix(mydata_cor))
+cor_matrix <- cor_result$r
+p_matrix <- cor_result$P
+
+# 可视化（带显著性标记）
+testRes <- cor.mtest(mydata_cor, conf.level=0.95)
+corrplot(cor_matrix, p.mat=testRes$p, method='circle', type='full',
+         sig.level=c(0.001, 0.01, 0.05), 
+         insig='label_sig', pch.col='grey20', diag=FALSE)
+
+# 4.2 Mantel检验（环境因子 vs 物种/功能数据）
+# ============================================
+library(vegan)
+library(ggcor)
+
+# 执行Mantel检验
+mantel_result <- mantel_test(物种数据, 环境数据,
+                             spec.select = list(fCH4=1, fCO2=2, dCH4=3, dCO2=4)) %>%
+  mutate(rd = cut(r, breaks=c(-Inf, 0.2, 0.4, Inf),
+                  labels=c("< 0.2", "0.2 - 0.4", ">= 0.4")),
+         pd = cut(p.value, breaks=c(-Inf, 0.01, 0.05, Inf),
+                  labels=c("< 0.01", "0.01 - 0.05", ">= 0.05")))
+
+# 配色方案
+col_fun <- colorRampPalette(c("blue","white","red"))(50)
+
+# 绘制组合图（相关性热图 + Mantel连线）
+p_mantel <- quickcor(环境数据, type="upper", cor.test=TRUE) +
+  geom_raster() +
+  geom_mark(r=NA, sig.thres=0.05, size=4, colour="white") +
+  scale_fill_gradientn(colours=col_fun) +
+  anno_link(aes(colour=pd, size=rd), data=mantel_result) +
+  scale_size_manual(values=c(0.5, 1, 1.2)) +
+  scale_colour_manual(values=c("#D95F02", "#1B9E77", "#A2A2A288")) +
+  guides(size=guide_legend(title="Mantel's r", override.aes=list(colour="grey35"), order=2),
+         colour=guide_legend(title="Mantel's p", override.aes=list(size=3), order=1),
+         fill=guide_colorbar(title="Pearson's r", order=3)) +
+  theme(plot.margin=margin(b=1.5, unit="cm"))
+
+ggsave("输出路径/mantel_combined.eps", plot=p_mantel, width=10, height=8, dpi=500)
+
+# 4.3 RDA冗余分析
+# ============================================
+library(vegan)
+
+# 判断使用RDA还是CCA（先运行DCA分析）
+decorana(物种数据)  # 若Axis长度 < 3，使用RDA；否则使用CCA
+
+# RDA分析
+rda_result <- rda(物种数据 ~ ., 环境数据)
+summary(rda_result)
+
+# 提取各轴解释度
+importance <- summary(rda_result)$concont$importance
+rda_axis1 <- round(importance[2, 1] * 100, 2)
+rda_axis2 <- round(importance[2, 2] * 100, 2)
+
+# 提取绘图数据
+pdat <- rda_result$CCA
+samples <- data.frame(sample=row.names(pdat$u), RDA1=pdat$u[,1], RDA2=pdat$u[,2])
+species <- data.frame(spece=row.names(pdat$v), RDA1=pdat$v[,1], RDA2=pdat$v[,2])
+envi <- data.frame(en=row.names(pdat$biplot), RDA1=pdat$biplot[,1], RDA2=pdat$biplot[,2])
+
+# 添加分组信息
+samples$Zone <- as.factor(分组向量)
+
+# 绘制RDA三序图
+p_rda <- ggplot() +
+  geom_hline(aes(yintercept=0), colour="gray88", linetype="dashed") +
+  geom_vline(aes(xintercept=0), colour="gray88", linetype="dashed") +
+  geom_point(data=species, aes(x=RDA1, y=RDA2), size=1, colour='pink', pch=3) +
+  geom_segment(data=species, aes(x=0, xend=RDA1*0.8, y=0, yend=RDA2*0.8),
+               arrow=arrow(length=unit(0.3,"cm")), colour='blue') +
+  geom_text(data=species, aes(x=RDA1*1, y=RDA2*1, label=spece), size=3, colour='blue') +
+  geom_segment(data=envi, aes(x=0, xend=RDA1*0.8, y=0, yend=RDA2*0.8),
+               arrow=arrow(length=unit(0.3,"cm")), colour='red') +
+  geom_text(data=envi, aes(x=RDA1*1, y=RDA2*1, label=en), size=3, colour='red', check_overlap=TRUE) +
+  geom_point(data=samples, aes(x=RDA1, y=RDA2, colour=Zone), size=1) +
+  theme_bw() +
+  theme(panel.grid.major=element_line(colour=NA), panel.grid.minor=element_blank()) +
+  xlab(paste('RDA1 (', rda_axis1, '%)', sep='')) +
+  ylab(paste('RDA2 (', rda_axis2, '%)', sep=''))
+
+ggsave("输出路径/RDA_plot.eps", plot=p_rda, width=10, height=8, dpi=500)
+
+# 4.4 PCA主成分分析
+# ============================================
+library(FactoMineR)
+library(factoextra)
+
+# PCA分析
+pca_result <- PCA(数据[, 数值列范围], graph=FALSE)
+
+# 查看结果
+summary(pca_result)
+
+# 样品散点图（带置信椭圆）
+p_pca_ind <- fviz_pca_ind(pca_result, geom.ind="point",
+                          pointsize=3, pointshape=21,
+                          fill.ind=数据$分组变量,
+                          palette=c("#00AFBB","#E7B800","#FC4E07"),
+                          addEllipses=TRUE, legend.title="Groups",
+                          title="") +
+  theme_classic()
+
+ggsave("输出路径/PCA_samples.eps", plot=p_pca_ind, width=10, height=8, dpi=500)
+
+# PCA双标图
+p_pca_biplot <- fviz_pca_biplot(pca_result, axes=c(1,2), repel=FALSE,
+                                addEllipses=TRUE, ellipse.alpha=0.15,
+                                geom=c("point"), geom.var=c("arrow","text"),
+                                arrowsize=0.7, labelsize=3,
+                                pointshape=21, pointsize=2,
+                                fill.ind=数据$分组变量, col.ind="black") +
+  theme_classic()
+
+ggsave("输出路径/PCA_biplot.eps", plot=p_pca_biplot, width=10, height=8, dpi=500)
+
+# 4.5 多元线性回归 + 逐步回归
+# ============================================
+library(car)
+library(flextable)
+
+# 全模型回归
+lm_full <- lm(因变量 ~ ., data=数据)
+
+# 检查多重共线性（VIF > 10 表示严重共线性）
+vif_values <- vif(lm_full)
+print(vif_values)
+
+# 逐步回归（基于AIC准则）
+lm_step <- step(lm_full, direction="both")
+
+# 输出结果表格
+as_flextable(lm_step)
+
+# 4.6 PLS-PM结构方程模型
+# ============================================
+library(plspm)
+
+# 定义路径矩阵（下三角矩阵，1表示影响关系）
+# 示例：5个潜变量（DOM, Eutro, Env, CH4, CO2）
+path_matrix <- rbind(
+  DOM   = c(0, 0, 0, 0, 0),
+  Eutro = c(1, 0, 0, 0, 0),
+  Env   = c(1, 1, 0, 0, 0),
+  CH4   = c(1, 1, 1, 0, 0),
+  CO2   = c(1, 1, 1, 1, 0)
+)
+
+# 查看路径矩阵
+innerplot(path_matrix)
+
+# 定义测量模型（每个潜变量对应的观测变量列索引）
+blocks_list <- list(1:3, 4:7, 8:10, 11:12, 13:14)
+
+# 设置模型类型（均为反映型）
+modes <- rep("A", 5)
+
+# 执行PLSPM分析（含Bootstrap检验）
+pls_result <- plspm(数据, path_matrix, blocks_list, 
+                    modes=modes, boot.val=TRUE)
+
+# 查看关键结果
+summary(pls_result)
+pls_result$gof  # 拟合优度（>0.7表示模型可靠）
+pls_result$inner_model  # 路径系数和显著性
+
+# 路径图可视化
+innerplot(pls_result, colpos='#CA5023', colneg='#457CC3', 
+          show.values=TRUE, lcol='gray20', box.lwd=0)
+
+# 查看载荷值（需 > 0.7）
+plot(pls_result, what="loadings", arr.width=0.1, 
+     show.values=TRUE, lcol='gray')
+
+# ============================================================================
+# 5. 图片输出统一设置
+# ============================================================================
+
+# 通用保存函数（EPS用于投稿，PNG用于预览）
+save_plots <- function(plot_obj, filename, width=10, height=8, dpi=500) {
+  ggsave(paste0(filename, ".eps"), plot=plot_obj, width=width, height=height, dpi=dpi)
+  ggsave(paste0(filename, ".png"), plot=plot_obj, width=width, height=height, dpi=dpi)
+}
