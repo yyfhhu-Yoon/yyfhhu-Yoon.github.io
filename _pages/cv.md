@@ -16,22 +16,6 @@ Education
   (joint educated in Nanjing Institute of Geography and Limnology, Chinese Academy of Sciences(NIGLAS)) 
 * B.S. in Urban Water Engineering, Hohai University, 2018-2022
 
-Work experience
-======
-* Spring 2024: Academic Pages Collaborator
-  * GitHub University
-  * Duties includes: Updates and improvements to template
-  * Supervisor: The Users
-
-* Fall 2015: Research Assistant
-  * GitHub University
-  * Duties included: Merging pull requests
-  * Supervisor: Professor Hub
-
-* Summer 2015: Research Assistant
-  * GitHub University
-  * Duties included: Tagging issues
-  * Supervisor: Professor Git
   
 Skills
 ======
